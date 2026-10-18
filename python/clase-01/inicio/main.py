@@ -5,22 +5,35 @@ TODOs para que el estudiante escriba el código durante la explicación.
 """
 
 import os
-
+from anthropic import Anthropic
 
 MODEL = "claude-sonnet-4-6"
 
+def require_api_key() -> str:
+    """Valida que exista ANTHROPIC_API_KEY antes de llamar a la API."""
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "No se encontró ANTHROPIC_API_KEY. "
+            "Exporta la variable de entorno antes de ejecutar el ejemplo."
+        )
+    return api_key
 
 def main() -> None:
-    """Completa este ejercicio durante la clase."""
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    api_key = require_api_key()
+    client = Anthropic(api_key=api_key)
+    message  = client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system="Responde como un mentor breve y practico de Python.",
+        messages=[
+            {"role": "user", "content": "Dame 3 ideas de proyectos simples para practicar Claude API"},
+        ],
+    )
 
-    # TODO 1: valida que exista ANTHROPIC_API_KEY antes de llamar a la API.
-    # TODO 2: crea el cliente de Anthropic.
-    # TODO 3: envía el mensaje principal de esta clase.
-    # TODO 4: imprime la respuesta de Claude en la terminal.
-    print("Inicio de la clase 01. Configura el ejercicio aquí.")
-    if not api_key:
-        print("Tip: exporta ANTHROPIC_API_KEY antes de ejecutar el ejemplo.")
+    for block in message.content:
+        if block.type == "text":
+            print(block.text)
 
 
 if __name__ == "__main__":
